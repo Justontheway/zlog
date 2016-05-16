@@ -160,6 +160,7 @@ void zlogf_time(char const * fmt, ...)
     struct timeval tv;
     time_t curtime;
     char* buffer = NULL;
+    size_t len = 0;
 
     va_list va;
 
@@ -172,10 +173,11 @@ void zlogf_time(char const * fmt, ...)
 #endif
     buffer = zlog_get_buffer();
     snprintf(buffer, ZLOG_BUFFER_STR_MAX_LEN, "[%s.%06lds] ", timebuf, tv.tv_usec);
-    buffer += strlen(timebuf) + 11; // space for time
+    len = strlen(buffer); // buffer used
+    buffer += len;
 
     va_start(va, fmt);
-    vsnprintf(buffer, ZLOG_BUFFER_STR_MAX_LEN, fmt, va);
+    vsnprintf(buffer, ZLOG_BUFFER_STR_MAX_LEN - len, fmt, va);
     zlog_finish_buffer();
     va_end(va);
 }
@@ -190,6 +192,7 @@ void zlog_time(char* filename, int line, char const * fmt, ...)
     struct timeval tv;
     time_t curtime;
     char* buffer = NULL;
+    size_t len = 0;
 
     va_list va;
 
@@ -203,10 +206,11 @@ void zlog_time(char* filename, int line, char const * fmt, ...)
 
     buffer = zlog_get_buffer();
     snprintf(buffer, ZLOG_BUFFER_STR_MAX_LEN, "[%s.%06lds] [@%s:%d]", timebuf, tv.tv_usec, filename, line);
-    buffer += strlen(buffer); // print at most 5 digit of line
+    len = strlen(buffer); // buffer used
+    buffer += len;
 
     va_start(va, fmt);
-    vsnprintf(buffer, ZLOG_BUFFER_STR_MAX_LEN, fmt, va);
+    vsnprintf(buffer, ZLOG_BUFFER_STR_MAX_LEN - len, fmt, va);
     zlog_finish_buffer();
     va_end(va);
 }
@@ -219,11 +223,14 @@ void zlog(char* filename, int line, char const * fmt, ...)
 
     char* buffer = NULL;
     va_list va;
+    size_t len = 0;
 
     buffer = zlog_get_buffer();
     snprintf(buffer, ZLOG_BUFFER_STR_MAX_LEN, "[@%s:%d]", filename, line);
+    len = strlen(buffer);
+    buffer += len;
     va_start(va, fmt);
-    vsnprintf(buffer, ZLOG_BUFFER_STR_MAX_LEN, fmt, va);
+    vsnprintf(buffer, ZLOG_BUFFER_STR_MAX_LEN - len, fmt, va);
     zlog_finish_buffer();
     va_end(va);
 }
